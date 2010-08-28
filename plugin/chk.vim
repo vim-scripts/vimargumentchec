@@ -467,6 +467,7 @@ function s:F.mod.prefixed(chk, args, shift)
                     let pref=""
                 endif
             endif
+            unlet gres
             "}}}6
             let i+=1
         endwhile
@@ -487,6 +488,7 @@ function s:F.mod.prefixed(chk, args, shift)
             elseif has_key(gres, "result")
                 let result[pref]=gres.result
             endif
+            unlet gres
         endfor
         "}}}5
         call add(args, result)
@@ -617,6 +619,7 @@ function s:F.cchk.getrequired(chk, args, shift)
         elseif has_key(gres, "result")
             call add(args, gres.result)
         endif
+        unlet gres
         let i+=1
     endfor
     "}}}4
@@ -985,6 +988,16 @@ function s:F.achk.hlgroup(Chk, Arg)
         return s:F.main.eerror(selfname, "value", ["str"])
     elseif a:Arg!~#'^[a-zA-Z0-9_]\+$'
         return s:F.main.eerror(selfname, "value", ["hid"], a:Arg)
+    elseif exists("*hlexists")
+        if !hlexists(a:Arg)
+            return s:F.main.eerror(selfname, "value", ["hnf"], a:Arg)
+        endif
+        return 1
+    elseif exists("*highlight_exists")
+        if !highlight_exists(a:Arg)
+            return s:F.main.eerror(selfname, "value", ["hnf"], a:Arg)
+        endif
+        return 1
     endif
     try
         execute "silent highlight ".a:Arg
