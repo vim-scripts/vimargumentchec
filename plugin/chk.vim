@@ -43,7 +43,7 @@ elseif !exists("s:g.pluginloaded")
                 \"dictfunctions": s:g.load.f,
                 \          "sid": s:g.load.sid,
                 \   "scriptfile": s:g.load.scriptfile,
-                \   "apiversion": "0.1",
+                \   "apiversion": "0.2",
                 \     "requires": [["load", '0.0']],
             \})
     let s:F.main._eerror=s:g.reginfo.functions.eerror
@@ -954,6 +954,7 @@ function s:F.achk.dict(chk, Arg)
 endfunction
 "{{{3 achk.file:   Проверить файл
 function s:F.achk.file(chk, Arg)
+    let selfname="achk.file"
     if type(a:Arg)!=type("")
         return s:F.main.eerror(selfname, "value", ["str"])
     endif
@@ -963,6 +964,10 @@ function s:F.achk.file(chk, Arg)
         return filewritable(a:Arg)==1
     elseif a:chk==#"dw"
         return filewritable(a:Arg)==2
+    elseif a:chk==#"d"
+        return isdirectory(a:Arg)
+    elseif a:chk==#"x"
+        return executable(fnamemodify(a:Arg, ':p'))
     elseif a:chk==#"w"
         return s:F.stuf.checkwr(a:Arg)
     endif
