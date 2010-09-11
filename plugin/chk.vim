@@ -43,7 +43,7 @@ elseif !exists("s:g.pluginloaded")
                 \"dictfunctions": s:g.load.f,
                 \          "sid": s:g.load.sid,
                 \   "scriptfile": s:g.load.scriptfile,
-                \   "apiversion": "0.3",
+                \   "apiversion": "0.4",
                 \     "requires": [["load", '0.0']],
             \})
     let s:F.main._eerror=s:g.reginfo.functions.eerror
@@ -350,7 +350,16 @@ function s:F.mod.optional(chk, args, shift)
     if type(result)!=type({})
         return 0
     endif
+    let reqlen=result.last+1
     let args+=result.result
+    unlet result
+    "{{{4 Получаем «следующие» аргументы
+    let result=s:F.cchk.getnext(a:chk, a:args, reqlen)
+    if type(result)!=type({})
+        return 0
+    endif
+    let args+=result.result
+    "{{{4 Убеждаемся, что все аргументы вписываются в модель
     if (result.last)!=(len(a:args)-1)
         return s:F.main.eerror(selfname, "value", ["ilen"],
                     \(result.last)."≠".(len(a:args)-1))
@@ -481,7 +490,7 @@ function s:F.mod.prefixed(chk, args, shift)
             return s:F.main.eerror(selfname, "value", ["ina"], len(a:args))
         endif
         "{{{5 Проверка наличия всех обязательных префиксов
-        if len(keys(rchk))
+        if !empty(rchk)
             return s:F.main.eerror(selfname, "value", ["pmis"],
                         \          "<<".join(keys(rchk), ">>, <<").">>")
         endif
@@ -629,6 +638,29 @@ function s:F.cchk.getrequired(chk, args, shift)
     endfor
     "}}}4
     return {"result": args, "last": last}
+endfunction
+"{{{3 cchk.getnext
+function s:F.cchk.getnext(chk, args, shift)
+    let selfname="cchk.getnext"
+    "{{{4 Проверяем наличие ключа «next»
+    if !has_key(a:chk, "next")
+        return {"result": [], "last": a:shift-1}
+    endif
+    "{{{4 Основной цикл: проверка аргументов
+    let args=[]
+    let i=a:shift
+    for l:Arg in a:args[(a:shift):]
+        let gres=s:F.comm.getarg(a:chk.next, l:Arg)
+        if type(gres)!=type({})
+            return s:F.main.eerror(selfname, "value", ["ival"], i)
+        elseif has_key(gres, "result")
+            call add(args, gres.result)
+        endif
+        unlet gres
+        let i+=1
+    endfor
+    "}}}4
+    return {"result": args, "last": len(a:args)-1}
 endfunction
 "{{{3 cchk._main: Проверить аргументы команды
 function s:F.cchk._main(chk, args, ...)
