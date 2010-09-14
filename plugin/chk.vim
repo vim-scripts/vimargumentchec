@@ -234,12 +234,16 @@ endfunction
 let s:g.tran={}
 "{{{4 Проверки для аргументов
 let s:g.tran.transchecks={
-            \"pipe": ["type(Trans)==".type([]), printf(s:g.p.emsg.ltran, "pipe")],
-            \"call": ["type(Trans)==".type([]), printf(s:g.p.emsg.ltran, "call")],
-            \"func": ["s:F.achk.isfunc(Trans)", printf(s:g.p.emsg.ftran, "func")],
-            \"eval": ["type(Trans)==".type(''), printf(s:g.p.emsg.stran, "eval")],
-            \"earg": ["1",                      ""                              ],
-            \  "eq": ["1",                      ""                              ],
+            \"pipe": ["type(Trans)==".type([]),
+            \                                 printf(s:g.p.emsg.ltran, "pipe")],
+            \"call": ["type(Trans)==".type([]),
+            \                                 printf(s:g.p.emsg.ltran, "call")],
+            \"func": ["s:F.achk.isfunc(1, Trans)",
+            \                                 printf(s:g.p.emsg.ftran, "func")],
+            \"eval": ["type(Trans)==".type(''),
+            \                                 printf(s:g.p.emsg.stran, "eval")],
+            \"earg": ["1",                      ""                            ],
+            \  "eq": ["1",                      ""                            ],
         \}
 let s:g.tran.chkroot=["chklst", [["in",   keys(s:g.tran.transchecks)],
             \                    ["any",  "1"                       ]]
