@@ -43,7 +43,7 @@ elseif !exists("s:g.pluginloaded")
                 \"dictfunctions": s:g.load.f,
                 \          "sid": s:g.load.sid,
                 \   "scriptfile": s:g.load.scriptfile,
-                \   "apiversion": "0.4",
+                \   "apiversion": "0.5",
                 \     "requires": [["load", '0.0']],
             \})
     let s:F.main._eerror=s:g.reginfo.functions.eerror
@@ -107,9 +107,11 @@ let s:g.p={
             \    "ival": "Invalid value",
             \   "kival": "Invalid value for key “%s”",
             \   "eival": "Invalid value in position %u",
+            \   "elval": "Invalid list item with index %u",
             \   "lival": "Invalid list of arguments starting from %u",
             \    "ilen": "Invalid length: expected %u, but got %u",
             \    "<len": "Invalid length: expected at least %u, but got %u",
+            \    ">len": "Invalid length: expected at most %u, but got %u",
             \    "rlen": "length of argument list must match number of ".
             \            "required arguments",
             \    "mlen": "length of argument list must not be greater then ".
@@ -905,12 +907,46 @@ function s:F.achk.chklst(chk, Arg)
     let i=0
     for l:Arg in a:Arg
         if !s:F.achk._main(a:chk[i], l:Arg)
-            return 0
+            return s:F.main.eerror(selfname, "value", ["elval", i])
         endif
         unlet l:Arg
         let i+=1
     endfor
     "}}}4
+    return 1
+endfunction
+"{{{3 achk.optlst:
+function s:F.achk.optlst(chk, Arg)
+    let selfname="achk.optlst"
+    if type(a:Arg)!=type([])
+        return s:F.main.eerror(selfname, "value", ["list"])
+    elseif len(a:Arg)<len(a:chk[0])
+        return s:F.main.eerror(selfname, "value", ["<len", len(a:chk[0]),
+                    \                              len(a:Arg)])
+    elseif len(a:Arg) > (len(a:chk[0])+len(a:chk[1]))
+        return s:F.main.eerror(selfname, "value",
+                    \          [">len", (len(a:chk[0])+len(a:chk[1])),
+                    \           len(a:Arg)])
+    endif
+    let i=0
+    for check in a:chk[0]
+        if !s:F.achk._main(a:chk[0][i], a:Arg[i])
+            return s:F.main.eerror(selfname, "value", ["elval", i])
+        endif
+        let i+=1
+    endfor
+    let j=0
+    let larg=len(a:Arg)
+    for check in a:chk[1]
+        if i==larg
+            return 1
+        endif
+        if !s:F.achk._main(a:chk[1][j], a:Arg[i])
+            return s:F.main.eerror(selfname, "value", ["elval", i])
+        endif
+        let j+=1
+        let i+=1
+    endfor
     return 1
 endfunction
 "{{{3 achk.alllst: Проверить каждый элемент в списке
@@ -1103,6 +1139,7 @@ let s:g.achk.chkchecks={
             \    "num": ["type(l:Chk)==type([])", s:g.p.emsg.list           ],
             \   "nums": ["type(l:Chk)==type([])", s:g.p.emsg.list           ],
             \ "chklst": ["type(l:Chk)==type([])", s:g.p.emsg.list           ],
+            \ "optlst": ["type(l:Chk)==type([])", s:g.p.emsg.list           ],
             \ "alllst": ["type(l:Chk)==type([])", s:g.p.emsg.list           ],
             \   "dict": ["type(l:Chk)==type([])", s:g.p.emsg.list           ],
             \    "len": ["type(l:Chk)==type([]) && len(l:Chk) && len(l:Chk)<=2",
@@ -1170,5 +1207,7 @@ lockvar! s:g
 unlockvar 1 s:g
 unlockvar s:g.achk.error
 unlockvar s:g.comm.rdict
+unlockvar s:g.doredir
+unlockvar s:g.errors
 " vim: ft=vim:ts=8:fdm=marker:fenc=utf-8
 
