@@ -4,9 +4,12 @@ This plugin provides the ability to check whether function or command
 arguments match specific model or whether some value matches specific model.
 
 Features:
-    ∙ Checks a list of arguments against specified model
-    ∙ Checks a single value against specified model
-    ∙ Provides a way to specify default values for optional arguments
-    ∙ Provides a way to check a single value, convert it, and check again
+     Checks a list of arguments against specified model
+     Checks a single value against specified model
+     Provides a way to specify default values for optional arguments
+     Provides a way to check a single value, convert it, and check again
 
-Documentation: http://kp-pav.narod2.ru/vim/doc/chk.txt.html
+Documentation: http://vimpluginloader.sourceforge.net/doc/chk.txt.html
+Project page: http://sourceforge.net/projects/vimargumentchec
+Dependencies (you do not need to install them by yourself, see installation details):
+vimscript #3184, http://sourceforge.net/projects/vimpluginloader
